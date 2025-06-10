@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Charts - Emotion Robot{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-4">Conversation Data Charts</h2>
+
+  <!-- Top Topics Bar Chart -->
+  <div class="card mb-4 shadow">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">Top Topics in Conversation</h5>
+    </div>
+    <div class="card-body">
+      <div id="topic_chart" style="height: 350px;"></div>
+    </div>
+  </div>
+
+  <!-- Valence Over Time Line Chart -->
+  <div class="card mb-4 shadow">
+    <div class="card-header bg-success text-white">
+      <h5 class="mb-0">Valence Over Time</h5>
+    </div>
+    <div class="card-body">
+      <div id="valence_chart" style="height: 350px;"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+  // Top Topics Bar Chart
+  var topic_chart = {{ topic_chart_json | safe }};
+  Plotly.newPlot('topic_chart', topic_chart.data, topic_chart.layout, {responsive:true});
+
+  // Valence Over Time Line Chart (build data from conversations)
+  var valence_data = [
+    {% for u, r, v, t in conversations %}
+      {{ v }},
+    {% endfor %}
+  ];
+  var valence_times = [
+    {% for u, r, v, t in conversations %}
+      "{{ t }}",
+    {% endfor %}
+  ];
+  var valence_trace = {
+      x: valence_times,
+      y: valence_data,
+      mode: 'lines+markers',
+      line: {shape: 'spline', color: '#10b981'},
+      fill: 'tozeroy',
+      marker: {size: 8, color: '#0ea5e9'},
+      name: 'Valence'
+  };
+  var valence_layout = {
+    yaxis: {title: 'Valence', range: [-1, 1]},
+    xaxis: {title: 'Time', showticklabels: false},
+    margin: {t:35, l:50, r:20, b:40},
+    plot_bgcolor: '#f8f9fa',
+    paper_bgcolor: '#f8f9fa',
+    height: 300
+  };
+  Plotly.newPlot('valence_chart', [valence_trace], valence_layout, {responsive:true});
+</script>
+{% endblock %}

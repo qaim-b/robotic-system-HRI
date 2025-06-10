@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Conversations - Emotion Robot{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <h2 class="mb-3 text-center">Conversation History</h2>
+  {% if conversations %}
+    <div class="chat-box mx-auto" style="max-width:600px;">
+      {% for u, r, v, cat, t in conversations %}
+        <!-- User message bubble -->
+        <div class="d-flex mb-3 align-items-end">
+          <img src="{{ url_for('static', filename='user_avatar.png') }}" alt="User" width="44" height="44" class="me-2 rounded-circle border border-secondary">
+          <div>
+            <div class="bg-white text-dark p-3 rounded-4 mb-1 shadow-sm" style="min-width:100px;">
+              <strong>User:</strong> {{ u }}
+            </div>
+            <div class="text-muted small ms-2">
+              <i class="bi bi-clock"></i> {{ t }}<br>
+              <span class="badge bg-secondary">Valence: {{ '%.2f'|format(v) }}</span>
+              <span class="badge bg-info text-dark ms-1">{{ cat }}</span>
+            </div>
+          </div>
+        </div>
+        <!-- Robot message bubble -->
+        <div class="d-flex flex-row-reverse mb-4 align-items-end">
+          <img src="{{ url_for('static', filename='robot_avatar.png') }}" alt="Robot" width="44" height="44" class="ms-2 rounded-circle border border-primary">
+          <div>
+            <div class="bg-primary text-white p-3 rounded-4 mb-1 shadow" style="min-width:100px;">
+              <strong>Robot:</strong> {{ r }}
+            </div>
+            <div class="text-muted small me-2 text-end">
+              <i class="bi bi-clock"></i> {{ t }}<br>
+              <span class="badge bg-secondary">Valence: {{ '%.2f'|format(v) }}</span>
+              <span class="badge bg-info text-dark ms-1">{{ cat }}</span>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-warning text-center">No conversations found for this user.</div>
+  {% endif %}
+</div>
+{% endblock %}
+
