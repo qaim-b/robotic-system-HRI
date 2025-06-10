@@ -74,3 +74,7 @@ def get_latest_conversations(user_id, limit=10):
                  FROM memory WHERE user_id=? ORDER BY id DESC LIMIT ?;''',
               (user_id, limit))
     convs = c.fetchall()
+    
+if __name__ == "__main__":
+    app.run(debug=True)
+
