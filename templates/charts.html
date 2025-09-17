@@ -1,66 +1,102 @@
 {% extends 'base.html' %}
 {% block title %}Charts - Emotion Robot{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
-  <h2 class="mb-4">Conversation Data Charts</h2>
 
-  <!-- Top Topics Bar Chart -->
-  <div class="card mb-4 shadow">
-    <div class="card-header bg-primary text-white">
-      <h5 class="mb-0">Top Topics in Conversation</h5>
-    </div>
-    <div class="card-body">
-      <div id="topic_chart" style="height: 350px;"></div>
+  <!-- Top row: title + quick nav -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Conversation Data Charts</h2>
+    <div class="btn-group">
+      <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary">
+        ← Back to Dashboard
+      </a>
+      <a href="{{ url_for('memories') }}" class="btn btn-outline-secondary">
+        Memories
+      </a>
+      <a href="{{ url_for('charts') }}" class="btn btn-primary">
+        Charts
+      </a>
     </div>
   </div>
 
-  <!-- Valence Over Time Line Chart -->
+
+  <!-- Chart 1: Valence Over Time (Line) -->
   <div class="card mb-4 shadow">
     <div class="card-header bg-success text-white">
       <h5 class="mb-0">Valence Over Time</h5>
     </div>
     <div class="card-body">
-      <div id="valence_chart" style="height: 350px;"></div>
+      <div id="valence_chart" style="height: 380px;"></div>
     </div>
   </div>
+
+  <!-- Chart 2: Valence Distribution (Histogram) -->
+  <div class="card mb-4 shadow">
+    <div class="card-header bg-info text-white">
+      <h5 class="mb-0">Valence Distribution (Last 30 Turns)</h5>
+    </div>
+    <div class="card-body">
+      <div id="valence_hist" style="height: 360px;"></div>
+      <small class="text-muted d-block mt-2">
+        Shows how often each valence range occurs. Useful for panelists to judge overall affect balance vs. spikes.
+      </small>
+    </div>
+  </div>
+
+   <!-- Chart 3: Top Topics (Bar) -->
+  <div class="card mb-4 shadow">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">Top Topics in Conversation</h5>
+    </div>
+    <div class="card-body">
+      <div id="topic_chart" style="height: 360px;"></div>
+    </div>
+  </div>
+
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script>
-  // Top Topics Bar Chart
-  var topic_chart = {{ topic_chart_json | safe }};
-  Plotly.newPlot('topic_chart', topic_chart.data, topic_chart.layout, {responsive:true});
+  // Server-prepared Plotly figures (from app.py)
+  var topic_chart   = {{ topic_chart_json   | safe }};
+  var valence_chart = {{ valence_chart_json | safe }};
 
-  // Valence Over Time Line Chart (build data from conversations)
-  var valence_data = [
-    {% for u, r, v, t in conversations %}
-      {{ v }},
-    {% endfor %}
-  ];
-  var valence_times = [
-    {% for u, r, v, t in conversations %}
-      "{{ t }}",
-    {% endfor %}
-  ];
-  var valence_trace = {
-      x: valence_times,
-      y: valence_data,
-      mode: 'lines+markers',
-      line: {shape: 'spline', color: '#10b981'},
-      fill: 'tozeroy',
-      marker: {size: 8, color: '#0ea5e9'},
+  // Render Chart 1 & 2
+  Plotly.newPlot('topic_chart', topic_chart.data, topic_chart.layout, {responsive:true});
+  Plotly.newPlot('valence_chart', valence_chart.data, valence_chart.layout, {responsive:true});
+
+  // Chart 3: Build a histogram from conversations passed in (u, r, v, t)
+  var convs = {{ conversations | tojson }};
+  var vals  = convs.map(function(row){ return row[2]; }).filter(function(v){ return v !== null && v !== undefined; });
+
+  // Fallback if no data
+  if (vals.length === 0) {
+    document.getElementById('valence_hist').innerHTML =
+      '<div class="text-muted">No valence data available to plot.</div>';
+  } else {
+    var histData = [{
+      x: vals,
+      type: 'histogram',
+      nbinsx: 15,
+      marker: {line: {width: 1}},
       name: 'Valence'
-  };
-  var valence_layout = {
-    yaxis: {title: 'Valence', range: [-1, 1]},
-    xaxis: {title: 'Time', showticklabels: false},
-    margin: {t:35, l:50, r:20, b:40},
-    plot_bgcolor: '#f8f9fa',
-    paper_bgcolor: '#f8f9fa',
-    height: 300
-  };
-  Plotly.newPlot('valence_chart', [valence_trace], valence_layout, {responsive:true});
+    }];
+
+    var histLayout = {
+      title: 'Distribution of Valence',
+      xaxis: { title: 'Valence (0 → 1)' },
+      yaxis: { title: 'Frequency' },
+      bargap: 0.05,
+      plot_bgcolor: '#f8fafc',
+      paper_bgcolor: '#f8fafc',
+      height: 340,
+      margin: {t: 50, l: 55, r: 20, b: 60}
+    };
+
+    Plotly.newPlot('valence_hist', histData, histLayout, {responsive:true});
+  }
 </script>
 {% endblock %}
