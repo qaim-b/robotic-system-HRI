@@ -5,7 +5,7 @@
   <h2 class="mb-3 text-center">Conversation History</h2>
   {% if conversations %}
     <div class="chat-box mx-auto" style="max-width:600px;">
-      {% for u, r, v, cat, t in conversations %}
+      {% for u, r, v, cat, t_index, t in conversations %}
         <!-- User message bubble -->
         <div class="d-flex mb-3 align-items-end">
           <img src="{{ url_for('static', filename='user_avatar.png') }}" alt="User" width="44" height="44" class="me-2 rounded-circle border border-secondary">
@@ -41,4 +41,3 @@
   {% endif %}
 </div>
 {% endblock %}
-
