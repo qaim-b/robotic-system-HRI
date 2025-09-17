@@ -1,37 +1,131 @@
 {% extends 'base.html' %}
 {% block title %}Memories - Emotion Robot{% endblock %}
+
 {% block content %}
 <div class="container py-3">
-  <h2 class="mb-3">All Memory Entries</h2>
-  {% if memories %}
-    <div class="table-responsive">
-      <table class="table table-striped table-bordered align-middle">
-        <thead>
-          <tr>
-            <th>Time</th>
-            <th>Turn</th>
-            <th>User Utterance</th>
-            <th>Robot Reply</th>
-            <th>Valence</th>
-            <th>Comfort Level</th>
-          </tr>
-        </thead>
-        <tbody>
-        {% for u, r, v, cat, turn, t in memories %}
-          <tr>
-            <td>{{ t }}</td>
-            <td>{{ turn }}</td>
-            <td>{{ u }}</td>
-            <td>{{ r }}</td>
-            <td>{{ '%.2f'|format(v) }}</td>
-            <td>{{ cat }}</td>
-          </tr>
-        {% endfor %}
-        </tbody>
-      </table>
+
+  <!-- Header + quick nav -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">All Memory Entries (by Pattern)</h2>
+    <div class="btn-group">
+      <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary">← Back to Dashboard</a>
+      <a href="{{ url_for('charts') }}" class="btn btn-outline-secondary">Charts</a>
+      <a href="{{ url_for('memories') }}" class="btn btn-primary">Memories</a>
     </div>
+  </div>
+
+  {% if user_id %}
+    <p class="text-muted">Showing latest entries for <strong>User ID:</strong> {{ user_id }}</p>
+  {% endif %}
+
+  {# Order must match your app.py PATTERNS exactly #}
+  {% set ordered_patterns = [
+    "Memory + Emotion",
+    "Emotion Only",
+    "Memory Only",
+    "Vanilla"
+  ] %}
+
+  {% if pattern_groups is defined and pattern_groups %}
+    {# Render known patterns in preferred order #}
+    {% for patt in ordered_patterns %}
+      {% if pattern_groups.get(patt) %}
+        <div class="card mb-4 shadow-sm">
+          <div class="card-header bg-light">
+            <h5 class="mb-0">{{ patt }}</h5>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-striped table-bordered align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th style="width:160px;">Time</th>
+                    <th style="width:80px;">Turn</th>
+                    <th>User Utterance</th>
+                    <th>Robot Reply</th>
+                    <th style="width:120px;">Valence</th>
+                    <th style="width:160px;">Comfort Level</th>
+                    <th style="width:120px;">Phase</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for u, r, v, cat, turn, t, phase, patt_name in pattern_groups[patt] %}
+                  <tr>
+                    <td class="text-nowrap">{{ t }}</td>
+                    <td>{{ turn }}</td>
+                    <td>{{ u }}</td>
+                    <td>{{ r }}</td>
+                    <td>
+                      {% if v is not none %}
+                        <span class="badge {{ 'bg-success' if v >= 0.4 else ('bg-warning text-dark' if v >= 0.2 else 'bg-danger') }}">
+                          {{ '%.3f'|format(v) }}
+                        </span>
+                      {% else %}
+                        <span class="text-muted">—</span>
+                      {% endif %}
+                    </td>
+                    <td>{{ cat }}</td>
+                    <td>{{ phase }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+
+    {# Render any unexpected pattern names so nothing is hidden #}
+    {% for patt_name, rows in pattern_groups.items() %}
+      {% if patt_name not in ordered_patterns %}
+        <div class="card mb-4 shadow-sm">
+          <div class="card-header bg-light">
+            <h5 class="mb-0">{{ patt_name }}</h5>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-striped table-bordered align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th style="width:160px;">Time</th>
+                    <th style="width:80px;">Turn</th>
+                    <th>User Utterance</th>
+                    <th>Robot Reply</th>
+                    <th style="width:120px;">Valence</th>
+                    <th style="width:160px;">Comfort Level</th>
+                    <th style="width:120px;">Phase</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for u, r, v, cat, turn, t, phase, patt in rows %}
+                  <tr>
+                    <td class="text-nowrap">{{ t }}</td>
+                    <td>{{ turn }}</td>
+                    <td>{{ u }}</td>
+                    <td>{{ r }}</td>
+                    <td>
+                      {% if v is not none %}
+                        <span class="badge {{ 'bg-success' if v >= 0.7 else ('bg-warning text-dark' if v >= 0.4 else 'bg-danger') }}">
+                          {{ '%.3f'|format(v) }}
+                        </span>
+                      {% else %}
+                        <span class="text-muted">—</span>
+                      {% endif %}
+                    </td>
+                    <td>{{ cat }}</td>
+                    <td>{{ phase }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
   {% else %}
-    <div class="alert alert-warning">No memories found yet for this user.</div>
+    <div class="alert alert-info">No user is logged in, please login and try again. </div>
   {% endif %}
 </div>
 {% endblock %}
