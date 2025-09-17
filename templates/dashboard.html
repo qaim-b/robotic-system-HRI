@@ -6,188 +6,187 @@
   <!-- Banner/Header -->
   <div class="row mb-4 align-items-center justify-content-center">
     <div class="col-3 col-md-2 text-center mb-2">
-      <img src="{{ url_for('static', filename='turtlebot3.png') }}" alt="Turtlebot3" class="img-fluid shadow rounded-4" style="max-height:75px;">
+      <img src="{{ url_for('static', filename='turtlebot3.png') }}" alt="Turtlebot" style="max-width:80px; border-radius: 15px;">
     </div>
     <div class="col-6 col-md-8 text-center">
-      <h1 class="display-6 fw-bold mb-1" style="letter-spacing:1px;">Emotion-Aware Robot Dashboard</h1>
+      <h1 class="display-6 fw-bold mb-1" style="letter-spacing:1px;">Emotion-Aware Turtlebot 3</h1>
       <span class="badge bg-success mb-1 fs-6">LIVE</span>
-      <div class="lead small text-secondary">Memory-driven dialog &bull; HRV emotion &bull; Gemini AI &bull; Turtlebot3</div>
+      <div class="lead small text-secondary">Memory-driven dialog &bull; HRV emotion sensing &bull; Gemini LLM</div>
     </div>
     <div class="col-3 col-md-2 text-center mb-2">
-      <img src="{{ url_for('static', filename='gemini_ai.png') }}" alt="Gemini AI" class="img-fluid shadow rounded-4" style="max-height:65px;">
+      <img src="{{ url_for('static', filename='gemini_ai.png') }}" alt="Gemini AI" style="max-width:80px; border-radius: 15px;">
     </div>
   </div>
 
-  <!-- Stats Cards Row -->
-  <div class="row g-3 mb-4 justify-content-center">
-    <div class="col-6 col-lg-3">
-      <div class="card shadow-sm border-0 h-100 animate__animated animate__fadeInDown" style="background: linear-gradient(135deg,#0ea5e9,#38bdf8); color:#fff;">
-        <div class="card-body text-center">
-          <div class="fs-6">Total Turns</div>
-          <div class="display-6 fw-bold">{{ num_turns }}</div>
+  <!-- Dashboard Metrics Row (Colorful Cards) -->
+  <div class="row mb-4">
+    <div class="col-md-3 col-6 mb-3">
+      <div class="card bg-primary text-white shadow rounded-4 text-center">
+        <div class="card-body">
+          <div class="fw-bold">User</div>
+          <div class="fs-5">{{ user_id if user_id else 'None' }}</div>
         </div>
       </div>
     </div>
-    <div class="col-6 col-lg-3">
-      <div class="card shadow-sm border-0 h-100 animate__animated animate__fadeInDown" style="background: linear-gradient(135deg,#a21caf,#c026d3); color:#fff;">
-        <div class="card-body text-center">
-          <div class="fs-6">Avg. Valence</div>
-          <div class="display-6 fw-bold">{{ avg_valence }}</div>
+    <div class="col-md-3 col-6 mb-3">
+      <div class="card bg-info text-white shadow rounded-4 text-center">
+        <div class="card-body">
+          <div class="fw-bold">Turns (last 30)</div>
+          <div class="fs-5">{{ num_turns }}</div>
         </div>
       </div>
     </div>
-    <div class="col-12 col-lg-6">
-      <div class="card shadow-sm border-0 h-100 animate__animated animate__fadeInDown" style="background: linear-gradient(135deg,#f1f5f9,#f8fafc);">
-        <div class="card-body text-center">
-          <div class="fs-6">Active User</div>
-          <div class="display-6 fw-bold text-primary">{{ user_id }}</div>
+    <div class="col-md-3 col-6 mb-3">
+      <div class="card bg-success text-white shadow rounded-4 text-center">
+        <div class="card-body">
+          <div class="fw-bold">Avg Valence</div>
+          <div class="fs-5">{{ avg_valence }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6 mb-3">
+      <div class="card bg-warning text-dark shadow rounded-4 text-center">
+        <div class="card-body">
+          <div class="fw-bold">Users</div>
+          <div class="fs-5">{{ users|length }}</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Charts Row -->
-  <div class="row g-4 mb-4">
-    <div class="col-lg-8">
-      <div class="card shadow p-4 mb-4 h-100 animate__animated animate__fadeIn">
-        <div class="card-title fs-5 mb-2 text-primary">Top Topics</div>
-        <div id="topic_chart" style="height:320px;"></div>
-      </div>
-    </div>
-    <div class="col-lg-4">
-      <div class="card shadow p-4 mb-4 h-100 animate__animated animate__fadeIn">
-        <div class="card-title fs-5 mb-2 text-success">Emotion Over Time</div>
-        <div id="valence_chart" style="height:320px;"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- System Modules/Highlights Row -->
-  <div class="row g-3 mb-4 justify-content-center">
-    <div class="col-6 col-md-3 text-center">
-      <div class="card p-3 shadow-sm border-0 h-100 bg-white animate__animated animate__fadeInUp d-flex flex-column align-items-center">
-        <img src="{{ url_for('static', filename='arduino.png') }}" alt="Arduino Pulse" style="max-width: 60px; height: 60px; object-fit: contain; margin-bottom: 8px;">
-        <div class="fw-bold small">Arduino Pulse</div>
-        <div class="text-muted small">HRV → Emotion</div>
-      </div>
-    </div>
-    <div class="col-6 col-md-3 text-center">
-      <div class="card p-3 shadow-sm border-0 h-100 bg-white animate__animated animate__fadeInUp d-flex flex-column align-items-center">
-        <img src="{{ url_for('static', filename='vosk.png') }}" alt="Vosk" style="max-width: 60px; height: 60px; object-fit: contain; margin-bottom: 8px;">
-        <div class="fw-bold small">Vosk Speech</div>
-        <div class="text-muted small">STT & TTS</div>
-      </div>
-    </div>
-    <div class="col-6 col-md-3 text-center">
-      <div class="card p-3 shadow-sm border-0 h-100 bg-white animate__animated animate__fadeInUp d-flex flex-column align-items-center">
-        <img src="{{ url_for('static', filename='robot_face.png') }}" alt="Tkinter GUI" style="max-width: 60px; height: 60px; object-fit: contain; margin-bottom: 8px;">
-        <div class="fw-bold small">Tkinter GUI</div>
-        <div class="text-muted small">Face Display</div>
-      </div>
-    </div>
-    <div class="col-6 col-md-3 text-center">
-      <div class="card p-3 shadow-sm border-0 h-100 bg-white animate__animated animate__fadeInUp d-flex flex-column align-items-center">
-        <img src="{{ url_for('static', filename='memory.png') }}" alt="Memory DB" style="max-width: 60px; height: 60px; object-fit: contain; margin-bottom: 8px;">
-        <div class="fw-bold small">Memory DB</div>
-        <div class="text-muted small">Persistent SQLite</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Recent Conversations (Chat Style) -->
-  <div class="card p-4 shadow-lg mb-4 animate__animated animate__fadeIn">
-    <div class="card-title fs-5 mb-3">Recent Conversations ({{ user_id }})</div>
-    {% if conversations %}
-      <div class="chat-box mx-auto" style="max-width:660px;">
-        {% for u, r, v, t in conversations %}
-          <div class="d-flex mb-2 align-items-end">
-            <img src="{{ url_for('static', filename='user_avatar.png') }}" alt="User" class="rounded-circle me-2 shadow" style="width:32px; height:32px; border:2px solid #38bdf8;">
-            <div>
-              <div class="bg-light text-dark p-2 rounded-4 mb-1 shadow-sm border" style="border-left: 5px solid #38bdf8;">
-                <span class="fw-bold">User:</span> {{ u }}
-              </div>
-              <div class="text-muted small ms-2"><i class="bi bi-clock"></i> {{ t }}</div>
-            </div>
+  <!-- Conversation Table -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <div class="card shadow rounded-4">
+        <div class="card-header bg-primary text-white rounded-top-4">
+          <div class="d-flex align-items-center">
+            <span class="me-2"><i class="bi bi-chat-dots"></i></span> Recent Conversations
           </div>
-          <div class="d-flex flex-row-reverse mb-3 align-items-end">
-            <img src="{{ url_for('static', filename='robot_avatar.png') }}" alt="Robot" class="rounded-circle ms-2 shadow" style="width:32px; height:32px; border:2px solid #a78bfa;">
-            <div>
-              <div class="bg-primary text-white p-2 rounded-4 mb-1 shadow" style="border-right: 5px solid #a78bfa;">
-                <span class="fw-bold">Robot:</span> {{ r }}
-                <span class="badge bg-light text-dark ms-2" style="font-size:0.9em;">Valence: {{ v }}</span>
-              </div>
-              <div class="text-muted small text-end me-2"><i class="bi bi-clock"></i> {{ t }}</div>
-            </div>
+        </div>
+        <div class="card-body p-0">
+          <div style="max-height:340px; overflow-y:auto;">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th scope="col">Time</th>
+                  <th scope="col">User Utterance</th>
+                  <th scope="col">Robot Reply</th>
+                  <th scope="col">Valence</th>
+                  <th scope="col">Comfort</th>
+                  <th scope="col">Phase</th>
+                  <th scope="col">Pattern</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for u, r, v, cat, turn, t, phase, pattern in conversations %}
+                <tr>
+                  <td class="small">{{ t }}</td>
+                  <td>{{ u }}</td>
+                  <td>{{ r }}</td>
+                  <td>
+                    {% if v is not none %}
+                      <span class="badge {{ 'bg-success' if v > 0.3 else ('bg-warning' if v > -0.3 else 'bg-danger') }}">
+                        {{ v }}
+                      </span>
+                    {% else %}
+                      <span class="text-muted">—</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ cat }}</td>
+                  <td>{{ phase }}</td>
+                  <td>{{ pattern }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                  <td colspan="7" class="text-center text-muted py-4">No recent conversations.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
           </div>
-        {% endfor %}
+        </div>
       </div>
-    {% else %}
-      <div class="alert alert-info">No conversations yet for this user.</div>
-    {% endif %}
+    </div>
+  </div>
+
+  <!-- Chart.js Appended Charts -->
+  <div class="row mt-4">
+    <div class="col-md-6 mb-4">
+      <div class="card shadow-sm rounded-4">
+        <div class="card-body">
+          <h5 class="card-title text-primary">Top Topics</h5>
+          <canvas id="topTopicsChart" height="180"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 mb-4">
+      <div class="card shadow-sm rounded-4">
+        <div class="card-body">
+          <h5 class="card-title text-success">Emotion Over Time</h5>
+          <canvas id="emotionOverTimeChart" height="180"></canvas>
+        </div>
+      </div>
+    </div>
   </div>
 
 </div>
-{% endblock %}
 
-{% block scripts %}
-<!-- Bootstrap icons and Animate.css (for smooth fade in) -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<!-- Chart.js Library and JS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  // Top Topics Chart
-  var topic_chart = {{ topic_chart_json | safe }};
-  Plotly.newPlot('topic_chart', topic_chart.data, topic_chart.layout, {responsive:true});
+const topTopicsLabels = {{ chart_topic_labels|tojson }};
+const topTopicsData = {{ chart_topic_counts|tojson }};
+const emotionLabels = {{ emotion_time_labels|tojson }};
+const emotionVals = {{ emotion_time_vals|tojson }};
 
-  // Valence Over Time Chart
-  var valence_data = [
-    {% for u, r, v, t in conversations %}
-      {{ v }},
-    {% endfor %}
-  ];
-  var valence_times = [
-    {% for u, r, v, t in conversations %}
-      "{{ t }}",
-    {% endfor %}
-  ];
-  var valence_trace = {
-      x: valence_times,
-      y: valence_data,
-      mode: 'lines+markers',
-      line: {shape: 'spline', color: '#10b981'},
-      fill: 'tozeroy',
-      marker: {size: 8, color: '#0ea5e9'},
-      name: 'Valence'
-  };
-  var valence_layout = {
-    yaxis: {title: 'Valence', range: [-1, 1]},
-    xaxis: {title: 'Time', showticklabels: false},
-    margin: {t:30, l:45, r:20, b:40},
-    plot_bgcolor: '#f8f9fa',
-    paper_bgcolor: '#f8f9fa',
-    height: 280
-  };
-  Plotly.newPlot('valence_chart', [valence_trace], valence_layout, {responsive:true});
+if (document.getElementById('topTopicsChart')) {
+  new Chart(document.getElementById('topTopicsChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: topTopicsLabels,
+      datasets: [{
+        label: 'Mentions',
+        data: topTopicsData,
+        borderRadius: 10,
+        backgroundColor: 'rgba(30,150,250,0.25)',
+        borderColor: '#1e96fa',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+      }
+    }
+  });
+}
 
-  // Live update for conversations (optional, if you want real-time)
-  // setInterval(function() {
-  //   fetch("/api/conversations")
-  //     .then(response => response.json())
-  //     .then(data => {
-  //       let chat = "";
-  //       for (let i = 0; i < data.length; i++) {
-  //         chat += `<div class="d-flex mb-2 align-items-end">
-  //             <img src="/static/user_avatar.png" class="rounded-circle me-2" style="width:32px; height:32px; border:2px solid #38bdf8;">
-  //             <div><div class="bg-light text-dark p-2 rounded-4 mb-1 shadow-sm border" style="border-left: 5px solid #38bdf8;"><span class="fw-bold">User:</span> ${data[i][0]}</div><div class="text-muted small ms-2"><i class="bi bi-clock"></i> ${data[i][3]}</div></div>
-  //           </div>
-  //           <div class="d-flex flex-row-reverse mb-3 align-items-end">
-  //             <img src="/static/robot_avatar.png" class="rounded-circle ms-2" style="width:32px; height:32px; border:2px solid #a78bfa;">
-  //             <div><div class="bg-primary text-white p-2 rounded-4 mb-1 shadow" style="border-right: 5px solid #a78bfa;"><span class="fw-bold">Robot:</span> ${data[i][1]} <span class="badge bg-light text-dark ms-2" style="font-size:0.9em;">Valence: ${data[i][2]}</span></div><div class="text-muted small text-end me-2"><i class="bi bi-clock"></i> ${data[i][3]}</div></div>
-  //           </div>`;
-  //       }
-  //       document.querySelector(".chat-box").innerHTML = chat;
-  //     });
-  // }, 5000);
+if (document.getElementById('emotionOverTimeChart')) {
+  new Chart(document.getElementById('emotionOverTimeChart').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: emotionLabels,
+      datasets: [{
+        label: 'Valence',
+        data: emotionVals,
+        fill: true,
+        tension: 0.3,
+        borderColor: '#16c784',
+        backgroundColor: 'rgba(22,199,132,0.08)',
+        pointRadius: 3,
+        pointBackgroundColor: '#16c784'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: true } },
+      scales: {
+        y: { min: -1, max: 1, title: { display: true, text: 'Valence' } }
+      }
+    }
+  });
+}
 </script>
 {% endblock %}
-
