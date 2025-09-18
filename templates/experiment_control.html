@@ -1,1 +1,375 @@
+{% extends 'base.html' %}
+{% block title %}Experiment Control - Emotion Robot{% endblock %}
 
+{% block content %}
+<div class="container-xxl py-3">
+
+  <div class="row mb-4 align-items-center justify-content-center">
+    <div class="col-3 col-md-2 text-center mb-2">
+      <img src="{{ url_for('static', filename='turtlebot3.png') }}" alt="Turtlebot3" style="max-width:100px;">
+    </div>
+    <div class="col-6 col-md-8 text-center">
+      <h1 class="display-6 fw-bold mb-1" style="letter-spacing:1px;">Experiment Control Panel</h1>
+      <span class="badge bg-primary mb-1 fs-6">SETUP</span>
+      <div class="lead small text-secondary">Select user, session, and experiment pattern. Move between cycles and phases freely.</div>
+    </div>
+    <div class="col-3 col-md-2 text-center mb-2">
+      <img src="{{ url_for('static', filename='gemini_ai.png') }}" alt="Gemini AI" style="max-width:100px;">
+    </div>
+  </div>
+
+  <!-- Setup Controls -->
+  <form id="experiment-setup" class="mb-4">
+    <div class="row justify-content-center g-2 align-items-end">
+      <div class="col-auto">
+        <label for="user-id" class="form-label">User ID</label>
+        <input type="text" id="user-id" class="form-control" name="user-id" required list="user-id-list">
+        <datalist id="user-id-list"></datalist>
+      </div>
+      <div class="col-auto">
+        <label for="session-num" class="form-label">Session</label>
+        <select id="session-num" class="form-select" name="session-num" required>
+          {% for s in range(1,9) %}
+          <option value="{{s}}">{{s}}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-auto">
+        <label for="pattern" class="form-label">Pattern</label>
+        <select id="pattern" class="form-select" name="pattern" required>
+          <option value="Memory + Emotion">Memory + Emotion</option>
+          <option value="Memory Only">Memory Only</option>
+          <option value="Emotion Only">Emotion Only</option>
+          <option value="Vanilla">Vanilla Chatbot</option>
+        </select>
+      </div>
+      <div class="col-auto">
+        <span class="badge bg-info fs-6" id="active-meta"></span>
+      </div>
+    </div>
+  </form>
+
+  <div class="row">
+    <!-- Sidebar: Cycles -->
+    <div class="col-md-2 mb-4">
+      <div class="list-group sticky-top" id="cycle-sidebar" style="top:100px;">
+        {% for i in range(1, 5) %}
+        <button type="button" class="list-group-item list-group-item-action cycle-nav" id="cycle-nav-{{i}}" data-cycle="{{i}}">
+          Cycle {{i}}
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+    <!-- Main: Phases for selected cycle -->
+    <div class="col-md-10">
+      <div class="card p-4 mb-4 text-center shadow-sm">
+        <h3 class="mb-4">Experiment Progress</h3>
+        <div id="experiment-phases">
+          {% for i in range(1, 5) %}
+          <div class="mb-4 phase-group card phase-card" id="phase-group-{{i}}" {% if i != 1 %}style="display:none"{% endif %}>
+            <div class="mb-2">
+              <strong class="fs-5">Cycle {{i}}</strong>
+            </div>
+            <!-- Baseline Phase -->
+            <div class="mb-3">
+              <button id="start-baseline-{{i}}" class="btn btn-outline-primary phase-btn">Start Baseline {{i}}</button>
+              <div id="timer-baseline-{{i}}" class="timer-label mt-2" style="display:none;">
+                <div class="big-timer">
+                  <span class="timer-value fs-2">30</span> <span class="text-muted fs-6">seconds left</span>
+                </div>
+                <button id="pause-baseline-{{i}}" class="btn btn-secondary btn-sm mt-2" style="display:none;">Pause</button>
+                <button id="restart-baseline-{{i}}" class="btn btn-danger btn-sm mt-2 ms-2" style="display:none;">Restart</button>
+              </div>
+              <div id="baseline-complete-{{i}}" class="fw-bold text-success my-2" style="display:none;">✅ Baseline {{i}} complete!</div>
+            </div>
+            <!-- Pattern/Experiment Phase -->
+            <div class="mb-3">
+              <button id="start-experiment-{{i}}" class="btn btn-outline-success phase-btn">Start Pattern {{i}}</button>
+              <div id="timer-experiment-{{i}}" class="timer-label mt-2" style="display:none;">
+                <div class="big-timer">
+                  <span class="timer-value fs-2">180</span> <span class="text-muted fs-6">seconds left</span>
+                </div>
+                <button id="pause-experiment-{{i}}" class="btn btn-secondary btn-sm mt-2" style="display:none;">Pause</button>
+                <button id="restart-experiment-{{i}}" class="btn btn-danger btn-sm mt-2 ms-2" style="display:none;">Restart</button>
+              </div>
+              <div id="experiment-complete-{{i}}" class="fw-bold text-success my-2" style="display:none;">✅ Pattern {{i}} complete!</div>
+            </div>
+            <!-- Reflection Phase -->
+            <div>
+              <button id="start-reflection-{{i}}" class="btn btn-outline-warning phase-btn">Start Reflection {{i}}</button>
+              <div id="timer-reflection-{{i}}" class="timer-label mt-2" style="display:none;">
+                <div class="big-timer">
+                  <span class="timer-value fs-2">30</span> <span class="text-muted fs-6">seconds left</span>
+                </div>
+                <button id="pause-reflection-{{i}}" class="btn btn-secondary btn-sm mt-2" style="display:none;">Pause</button>
+                <button id="restart-reflection-{{i}}" class="btn btn-danger btn-sm mt-2 ms-2" style="display:none;">Restart</button>
+              </div>
+              <div id="reflection-complete-{{i}}" class="fw-bold text-success my-2" style="display:none;">✅ Reflection {{i}} complete!</div>
+            </div>
+          </div>
+          {% endfor %}
+
+          <div id="all-done" class="fw-bold text-primary mt-3" style="display:none;">
+            <i class="bi bi-check2-circle"></i> All cycles complete! Please proceed to the Download Data page to save your CSV files.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> <!-- container-xxl -->
+
+<script>
+const BASELINE_TIME = 30;
+const EXPERIMENT_TIME = 180;
+const REFLECTION_TIME = 30;
+let totalCycles = 4;
+
+function getSetupData() {
+  return {
+    user_id: document.getElementById('user-id').value,
+    session: document.getElementById('session-num').value,
+    pattern: document.getElementById('pattern').value
+  }
+}
+
+function updateMetaBadge() {
+  let { user_id, session, pattern } = getSetupData();
+  document.getElementById('active-meta').textContent =
+    `User: ${user_id || "-"} | Session: ${session || "-"} | Pattern: ${pattern || "-"}`;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  for (let i = 1; i <= totalCycles; i++) {
+    setupPhaseCycle(i, totalCycles);
+  }
+  updateMetaBadge();
+  document.getElementById('user-id').addEventListener('input', updateMetaBadge);
+  document.getElementById('session-num').addEventListener('change', updateMetaBadge);
+  document.getElementById('pattern').addEventListener('change', updateMetaBadge);
+
+  // Sidebar navigation
+  for (let i = 1; i <= totalCycles; i++) {
+    document.getElementById(`cycle-nav-${i}`).addEventListener('click', function() {
+      // Hide all groups
+      for (let j = 1; j <= totalCycles; j++) {
+        document.getElementById(`phase-group-${j}`).style.display = 'none';
+        document.getElementById(`cycle-nav-${j}`).classList.remove('active');
+      }
+      // Show selected
+      document.getElementById(`phase-group-${i}`).style.display = 'block';
+      document.getElementById(`cycle-nav-${i}`).classList.add('active');
+    });
+  }
+  // Default: Cycle 1 active
+  document.getElementById('cycle-nav-1').classList.add('active');
+});
+
+function setupPhaseCycle(idx, totalPhases) {
+  // Elements for all 3 phases
+  const baselineBtn = document.getElementById(`start-baseline-${idx}`);
+  const experimentBtn = document.getElementById(`start-experiment-${idx}`);
+  const reflectionBtn = document.getElementById(`start-reflection-${idx}`);
+
+  const baselineTimerDiv = document.getElementById(`timer-baseline-${idx}`);
+  const experimentTimerDiv = document.getElementById(`timer-experiment-${idx}`);
+  const reflectionTimerDiv = document.getElementById(`timer-reflection-${idx}`);
+
+  const baselineTimerValue = baselineTimerDiv.querySelector('.timer-value');
+  const experimentTimerValue = experimentTimerDiv.querySelector('.timer-value');
+  const reflectionTimerValue = reflectionTimerDiv.querySelector('.timer-value');
+
+  const baselinePauseBtn = document.getElementById(`pause-baseline-${idx}`);
+  const experimentPauseBtn = document.getElementById(`pause-experiment-${idx}`);
+  const reflectionPauseBtn = document.getElementById(`pause-reflection-${idx}`);
+
+  const baselineRestartBtn = document.getElementById(`restart-baseline-${idx}`);
+  const experimentRestartBtn = document.getElementById(`restart-experiment-${idx}`);
+  const reflectionRestartBtn = document.getElementById(`restart-reflection-${idx}`);
+
+  const baselineComplete = document.getElementById(`baseline-complete-${idx}`);
+  const experimentComplete = document.getElementById(`experiment-complete-${idx}`);
+  const reflectionComplete = document.getElementById(`reflection-complete-${idx}`);
+
+  // Always enabled, repeatable phases!
+  let currentTimer = null;
+  let paused = false;
+  let timeLeft = 0;
+
+  function runTimer(timerDiv, timerValueSpan, pauseBtn, restartBtn, duration, onComplete, onStartBtn, completeDivs) {
+    if (currentTimer) clearInterval(currentTimer);
+    timerDiv.style.display = 'block';
+    timerValueSpan.textContent = duration;
+    pauseBtn.style.display = 'inline-block';
+    restartBtn.style.display = 'inline-block';
+    pauseBtn.textContent = 'Pause';
+    timeLeft = duration;
+    paused = false;
+    onStartBtn.disabled = true;
+
+    // Hide all complete ticks for this phase on start/restart
+    if (Array.isArray(completeDivs)) {
+      completeDivs.forEach(div => div && (div.style.display = 'none'));
+    } else if (completeDivs) {
+      completeDivs.style.display = 'none';
+    }
+
+    currentTimer = setInterval(() => {
+      if (!paused) {
+        timeLeft--;
+        timerValueSpan.textContent = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(currentTimer);
+          pauseBtn.style.display = 'none';
+          restartBtn.style.display = 'inline-block';
+          timerDiv.style.display = 'none';
+          if (Array.isArray(completeDivs)) {
+            completeDivs.forEach(div => div && (div.style.display = 'block'));
+          } else if (completeDivs) {
+            completeDivs.style.display = 'block';
+          }
+          // Re-enable start button so you can repeat
+          onStartBtn.disabled = false;
+        }
+      }
+    }, 1000);
+
+    //Pause/Resume -> publish control
+    pauseBtn.onclick = function() {
+      paused = !paused;
+      pauseBtn.textContent = paused ? 'Resume' : 'Pause';
+      postControl(paused ? 'pause' : 'resume', phaseLabel, idx);
+    };
+    //Restart -> publish control
+    restartBtn.onclick = function() {
+      clearInterval(currentTimer);
+      timerDiv.style.display = 'none';
+      pauseBtn.style.display = 'none';
+      restartBtn.style.display = 'none';
+      // Hide the green tick on restart for all phases in this cycle
+      baselineComplete && (baselineComplete.style.display = 'none');
+      experimentComplete && (experimentComplete.style.display = 'none');
+      reflectionComplete && (reflectionComplete.style.display = 'none');
+      // Re-enable all phase Start buttons in this cycle
+      baselineBtn.disabled = false;
+      experimentBtn.disabled = false;
+      reflectionBtn.disabled = false;
+      postControl('restart', phaseLabel, idx);
+    };
+  }
+
+  // Baseline phase
+  baselineBtn.addEventListener('click', function() {
+    runTimer(
+      baselineTimerDiv, baselineTimerValue, baselinePauseBtn, baselineRestartBtn, BASELINE_TIME,
+      function() {},
+      baselineBtn,
+      baselineComplete
+    );
+    let {user_id, session, pattern} = getSetupData();
+    fetch("/set_phase", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        phase: `Baseline ${idx}`,
+        user_id: user_id,
+        session: session,
+        pattern: pattern
+      })
+    });
+  });
+
+  // Experiment phase
+  experimentBtn.addEventListener('click', function() {
+    runTimer(
+      experimentTimerDiv, experimentTimerValue, experimentPauseBtn, experimentRestartBtn, EXPERIMENT_TIME,
+      function() {},
+      experimentBtn,
+      experimentComplete
+    );
+    let {user_id, session, pattern} = getSetupData();
+    fetch("/set_phase", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        phase: `Pattern ${idx}`,
+        user_id: user_id,
+        session: session,
+        pattern: pattern
+      })
+    });
+  });
+
+  // Reflection phase
+  reflectionBtn.addEventListener('click', function() {
+    runTimer(
+      reflectionTimerDiv, reflectionTimerValue, reflectionPauseBtn, reflectionRestartBtn, REFLECTION_TIME,
+      function() {},
+      reflectionBtn,
+      reflectionComplete
+    );
+    let {user_id, session, pattern} = getSetupData();
+    fetch("/set_phase", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        phase: `Reflection ${idx}`,
+        user_id: user_id,
+        session: session,
+        pattern: pattern
+      })
+    });
+  });
+
+  //Calling existing pause/restart handlers
+
+  function postControl(action, label, cycle) {
+    const user_id = document.getElementById('user-id').value;
+    const session = document.getElementById('session-num').value;
+    const pattern = document.getElementById('pattern').value;
+    fetch("/control", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ action, label, cycle, user_id, session, pattern })
+    });
+  }
+
+}
+</script>
+<style>
+.phase-card.current, .phase-card {
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(20,32,50,0.07);
+  border: 2px solid #f1f5f9;
+  background: #fff;
+  transition: border-color 0.3s;
+}
+.phase-group {
+  margin-bottom: 28px;
+}
+.phase-card:target, .phase-card:focus-within, .phase-card.active {
+  border-color: #6366f1 !important;
+  box-shadow: 0 3px 16px rgba(90,90,200,0.13);
+}
+.big-timer {
+  font-size: 2.6rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  margin-bottom: 0.2em;
+}
+.btn[disabled] {
+  opacity: 0.75;
+  pointer-events: none;
+}
+.list-group .active {
+  background-color: #38bdf8 !important;
+  border-color: #0ea5e9 !important;
+  color: #fff !important;
+}
+@media (max-width: 768px) {
+  .big-timer { font-size: 1.6rem; }
+  .phase-card { padding: 1.2rem; }
+  .col-md-2 { flex: 0 0 100%; max-width: 100%; margin-bottom: 18px; }
+  .col-md-10 { flex: 0 0 100%; max-width: 100%; }
+}
+</style>
+{% endblock %}
