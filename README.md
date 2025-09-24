@@ -1,4 +1,4 @@
-# 🤖 Emotion-Aware Turtlebot3 Dialogue System
+# 🤖 Emotion-Aware and Memory Turtlebot3 Dialogue System
 
 ## 🚀 Project Goal
 This project builds a robot that can:
