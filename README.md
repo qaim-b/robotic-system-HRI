@@ -68,7 +68,7 @@ A web dashboard shows real-time logs and analysis for research use.
 
 ---
 
-## 🛠️ Run the Project
+## 🛠️ How to Run the Project
 ```bash
 # Clone repo
 git clone https://github.com/username/emotion_aware_robot
