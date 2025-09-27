@@ -9,7 +9,7 @@ This project builds a robot that can:
 - **Show feelings**: Displays happy/sad faces on a GUI.  
 - **Log data**: Dashboard shows charts, logs, and exports CSV for research.  
 
-This project helps elderly people in care homes by giving them meaningful and supportive conversations.  
+This project helps people, especially elderly people, in care homes by giving them meaningful and supportive conversations.  
 
 ---
 
