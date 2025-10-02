@@ -38,7 +38,7 @@ emotion_aware_robot/
    - Robot reply → spoken with gTTS.  
    - Echo prevention using `/speech_start` and `/speech_end`.  
 
-3. **Memory Module**  
+3. **Memory**  
    - Saves all conversation turns in SQLite (`memory.db`).  
    - Retrieves important memories and injects them into replies.  
 
